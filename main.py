@@ -1,24 +1,28 @@
-from visibility import Visibility, read_data
-from matplotlib import pyplot as plt
-from astropy.time import Time
-import matplotlib.dates as mdates
+import pandas as pd
+from visibility import Visibility
+from pandas import ExcelWriter
 
-landolt = read_data()
 
+stars = pd.read_pickle("landolt.pkl")
+# print(stars.loc[0]["coords"])
 v = Visibility()
-stars = v.check("2022-11-10", "2022-11-15")
 
-for star, visibility in stars:
-    star_data = landolt[landolt["Star"] == star]
-    plt.cla()
-    c = list(star_data['coords'])[0]
-    plt.title(f"{star}, {c.ra.hour} - {c.dec.degree}")
-    dates = Time(visibility["jd"], format="jd").datetime
-    # print(dates)
-    # print(visibility["jd"].min(), visibility["jd"].max())
-    plt.plot(dates, visibility["Alt"])
-    myFmt = mdates.DateFormatter('%d-%H')
-    plt.gca().xaxis.set_major_formatter(myFmt)
-    plt.axhline(y=20, color='r', linestyle='-')
-    plt.show()
+# print(v.calculate("2022-11-10", stars.loc[0]["coords"]))
+# print(v.check("2022-11-10", "2022-11-11"))
 
+with ExcelWriter(f"gozlenebilirlik.xls") as writer:
+    for date, df in v.check("2022-11-01", "2023-01-01"):
+        df.to_excel(writer, f'{date}')
+        #
+    #     for star, df in name_df:
+
+# with ExcelWriter("gozlenebilirlik.xls") as writer:
+#     for date, star, df in v.check("2022-11-10", "2022-11-12"):
+#         df.to_excel(writer, f'{date}_{star}')
+#
+#
+
+
+# from astropy.coordinates import Angle
+# a = Angle("01 05 22 hour")
+# print(a.hms.h)
